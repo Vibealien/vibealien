@@ -8,6 +8,13 @@ import * as Y from 'yjs'
 import type { WebsocketProvider } from 'y-websocket'
 import { editorService } from '@/lib/services'
 import { explorerService } from '@/lib/services/explorer.service'
+import {
+  EDITOR_OPTIONS,
+  READONLY_EDITOR_OPTIONS,
+  applyTheme,
+  setupKeybindings,
+  configureLanguage,
+} from '@/lib/editor/monaco-config'
 
 // Dynamic import for MonacoBinding to avoid SSR issues
 let MonacoBinding: any = null
@@ -65,35 +72,27 @@ export const CollaborativeCodeEditor: React.FC<CollaborativeEditorProps> = ({
       isInitializedRef.current = true
     }
 
-    // Configure editor theme
-    monaco.editor.defineTheme('vibealien-dark', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { token: 'keyword', foreground: '7B2FF7', fontStyle: 'bold' },
-        { token: 'string', foreground: '00FFA3' },
-        { token: 'comment', foreground: '3A3A5A', fontStyle: 'italic' },
-        { token: 'number', foreground: '00FFA3' },
-        { token: 'function', foreground: '9A4EFF' },
-        { token: 'type', foreground: '7B2FF7' },
-      ],
-      colors: {
-        'editor.background': '#0C0C1E',
-        'editor.foreground': '#FFFFFF',
-        'editor.lineHighlightBackground': '#1E1E3F',
-        'editor.selectionBackground': '#7B2FF740',
-        'editor.inactiveSelectionBackground': '#7B2FF720',
-        'editorCursor.foreground': '#00FFA3',
-        'editorLineNumber.foreground': '#3A3A5A',
-        'editorLineNumber.activeForeground': '#7B2FF7',
+    // Apply enhanced theme
+    applyTheme(monaco)
+
+    // Configure language-specific settings
+    configureLanguage(monaco, language)
+
+    // Setup keyboard shortcuts
+    setupKeybindings(editor, monaco, {
+      onSave,
+      onFormat: () => {
+        editor.getAction('editor.action.formatDocument')?.run()
       },
-    })
-
-    monaco.editor.setTheme('vibealien-dark')
-
-    // Add keyboard shortcuts
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      onSave?.()
+      onFind: () => {
+        editor.getAction('actions.find')?.run()
+      },
+      onReplace: () => {
+        editor.getAction('editor.action.startFindReplaceAction')?.run()
+      },
+      onCommandPalette: () => {
+        editor.getAction('editor.action.quickCommand')?.run()
+      },
     })
 
     // Track cursor position
@@ -304,93 +303,7 @@ export const CollaborativeCodeEditor: React.FC<CollaborativeEditorProps> = ({
         defaultValue={value} // Use defaultValue instead of value to prevent remounting
         path={filePath} // Use actual file path for proper model caching
         onMount={handleEditorDidMount}
-        options={{
-          // Appearance
-          minimap: { enabled: true, side: 'right', maxColumn: 120 },
-          fontSize: 14,
-          fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
-          fontLigatures: true,
-          lineNumbers: 'on',
-          lineNumbersMinChars: 4,
-          glyphMargin: true,
-          folding: true,
-          foldingStrategy: 'indentation',
-          renderLineHighlight: 'all',
-          renderLineHighlightOnlyWhenFocus: false,
-          wordWrap: 'off',
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          renderWhitespace: 'selection',
-          renderControlCharacters: false,
-          
-          // Brackets & indentation
-          bracketPairColorization: { enabled: true },
-          guides: {
-            bracketPairs: true,
-            indentation: true,
-          },
-          
-          // Cursor & scrolling
-          cursorBlinking: 'smooth',
-          cursorSmoothCaretAnimation: 'on',
-          cursorStyle: 'line',
-          cursorWidth: 2,
-          smoothScrolling: true,
-          mouseWheelZoom: true,
-          
-          // Editing features
-          readOnly,
-          formatOnPaste: true,
-          formatOnType: true,
-          autoIndent: 'full',
-          tabSize: 2,
-          insertSpaces: true,
-          detectIndentation: true,
-          trimAutoWhitespace: true,
-          
-          // IntelliSense & suggestions
-          quickSuggestions: {
-            other: true,
-            comments: false,
-            strings: true,
-          },
-          suggestOnTriggerCharacters: true,
-          acceptSuggestionOnEnter: 'on',
-          tabCompletion: 'on',
-          wordBasedSuggestions: 'matchingDocuments',
-          suggestSelection: 'first',
-          
-          // Code lens & hover
-          codeLens: true,
-          hover: {
-            enabled: true,
-            delay: 300,
-          },
-          
-          // Find & replace
-          find: {
-            seedSearchStringFromSelection: 'selection',
-            autoFindInSelection: 'multiline',
-            addExtraSpaceOnTop: true,
-          },
-          
-          // Scrollbar
-          scrollbar: {
-            vertical: 'auto',
-            horizontal: 'auto',
-            useShadows: true,
-            verticalHasArrows: false,
-            horizontalHasArrows: false,
-            verticalScrollbarSize: 14,
-            horizontalScrollbarSize: 14,
-          },
-          
-          // Performance
-          renderValidationDecorations: 'on',
-          occurrencesHighlight: 'singleFile',
-          selectionHighlight: true,
-          matchBrackets: 'always',
-        }}
+        options={readOnly ? READONLY_EDITOR_OPTIONS : EDITOR_OPTIONS}
       />
     </div>
   )

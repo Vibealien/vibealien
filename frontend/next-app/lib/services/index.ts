@@ -31,3 +31,10 @@ export { historyService } from './history.service'
 export { autocompleteService } from './autocomplete.service'
 export { shellService } from './shell.service'
 
+/**
+ * AI and collaboration services
+ */
+
+export { aiChatService } from './ai-chat.service'
+export { collaborationService } from './collaboration.service'
+
