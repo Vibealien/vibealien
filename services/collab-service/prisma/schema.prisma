@@ -1,0 +1,40 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CollaborationSession {
+  id          String   @id @default(uuid())
+  projectId   String
+  fileId      String
+  userId      String
+  userWallet  String
+  username    String
+  joinedAt    DateTime @default(now())
+  leftAt      DateTime?
+  isActive    Boolean  @default(true)
+
+  @@index([projectId])
+  @@index([fileId])
+  @@index([userId])
+  @@index([isActive])
+  @@map("collaboration_sessions")
+}
+
+model CursorPosition {
+  id          String   @id @default(uuid())
+  sessionId   String
+  userId      String
+  fileId      String
+  line        Int
+  column      Int
+  updatedAt   DateTime @updatedAt
+
+  @@unique([sessionId, userId, fileId])
+  @@index([fileId])
+  @@map("cursor_positions")
+}

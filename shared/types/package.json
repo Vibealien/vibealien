@@ -1,0 +1,23 @@
+{
+  "name": "@vibecode/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for VibeCode platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["vibecode", "types", "typescript"],
+  "author": "VibeCode Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

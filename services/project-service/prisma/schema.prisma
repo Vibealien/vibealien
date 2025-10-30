@@ -1,0 +1,139 @@
+// Prisma schema for Project Service
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String   // User ID from user-service
+  ownerWallet String   // Denormalized for quick lookups
+  
+  // Solana specific
+  programId   String?  @unique // Deployed program ID
+  network     String   @default("devnet") // devnet, testnet, mainnet-beta
+  
+  // Visibility
+  visibility  Visibility @default(PUBLIC)
+  
+  // Statistics
+  starsCount  Int      @default(0)
+  forksCount  Int      @default(0)
+  buildsCount Int      @default(0)
+  
+  // Metadata
+  tags        String[] // e.g., ["DeFi", "NFT", "Gaming"]
+  language    String   @default("rust") // rust, python, c
+  framework   String?  // anchor, native, seahorse
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastBuiltAt DateTime?
+  
+  // Relations
+  files       ProjectFile[]
+  builds      Build[]
+  stars       Star[]
+  forks       Fork[]
+  
+  @@index([ownerId])
+  @@index([ownerWallet])
+  @@index([programId])
+  @@index([visibility])
+  @@index([createdAt])
+}
+
+model ProjectFile {
+  id        String   @id @default(uuid())
+  projectId String
+  path      String   // e.g., "src/lib.rs", "programs/my-program/src/lib.rs"
+  content   String   @db.Text // File content
+  language  String   @default("rust")
+  size      Int      @default(0) // File size in bytes
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, path])
+  @@index([projectId])
+}
+
+model Build {
+  id        String      @id @default(uuid())
+  projectId String
+  
+  // Build info
+  status    BuildStatus @default(PENDING)
+  buildNumber Int      // Incremental build number per project
+  
+  // Results
+  logs      String?     @db.Text
+  artifacts String?     // JSON: { "program": "base64...", "idl": {...} }
+  errorMsg  String?     @db.Text
+  
+  // Metadata
+  trigger   String      @default("manual") // manual, commit, schedule
+  duration  Int?        // Build duration in milliseconds
+  
+  // Timestamps
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+  
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, buildNumber])
+  @@index([projectId])
+  @@index([status])
+}
+
+model Star {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+  
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model Fork {
+  id              String   @id @default(uuid())
+  originalId      String   // Original project ID
+  forkedProjectId String   // New project ID created as fork
+  userId          String   // User who forked
+  createdAt       DateTime @default(now())
+  
+  project         Project  @relation(fields: [originalId], references: [id], onDelete: Cascade)
+  
+  @@index([originalId])
+  @@index([forkedProjectId])
+  @@index([userId])
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+enum BuildStatus {
+  PENDING
+  BUILDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}

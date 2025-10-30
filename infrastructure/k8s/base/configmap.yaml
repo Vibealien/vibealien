@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vibecode-config
+  namespace: vibecode-prod
+data:
+  NODE_ENV: "production"
+  SOLANA_NETWORK: "mainnet-beta"
+  SOLANA_RPC_URL: "https://api.mainnet-beta.solana.com"
+  NATS_URL: "nats://nats-service:4222"
+  REDIS_URL: "redis://redis-service:6379"
+  BUILD_TIMEOUT: "300000"
+  MAX_CONCURRENT_BUILDS: "5"

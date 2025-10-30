@@ -1,0 +1,21 @@
+packages:
+  - 'services/*'
+  - 'shared/*'
+  - 'frontend/*'
+
+# Enable shared workspace protocol
+prefer-workspace-packages: true
+
+# Hoisting settings
+hoist: true
+hoist-pattern:
+  - '*eslint*'
+  - '*prettier*'
+  - '*typescript*'
+  - '@types/*'
+
+# Strict peer dependencies
+strict-peer-dependencies: false
+
+# Save exact versions
+save-exact: true

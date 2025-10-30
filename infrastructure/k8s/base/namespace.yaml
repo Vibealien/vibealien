@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vibecode-prod
+  labels:
+    environment: production
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vibecode-staging
+  labels:
+    environment: staging

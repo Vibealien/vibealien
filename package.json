@@ -1,0 +1,70 @@
+{
+  "name": "vibecode",
+  "version": "1.0.0",
+  "description": "Collaborative Solana Smart Contract Development Platform",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "dev": "pnpm -r --parallel dev",
+    "dev:auth": "pnpm --filter auth-service dev",
+    "dev:user": "pnpm --filter user-service dev",
+    "dev:api-gateway": "pnpm --filter api-gateway dev",
+    "dev:frontend": "pnpm --filter next-app dev",
+    "dev:project": "pnpm --filter project-service dev",
+    "dev:collab": "pnpm --filter collaboration-service dev",
+    "build": "pnpm -r build",
+    "build:services": "pnpm --filter './services/*' build",
+    "build:shared": "pnpm --filter './shared/*' build",
+    "test": "pnpm -r test",
+    "test:unit": "pnpm -r test:unit",
+    "test:integration": "pnpm -r test:integration",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v",
+    "db:migrate": "pnpm -r db:migrate",
+    "db:generate": "pnpm -r db:generate",
+    "db:studio": "pnpm --filter auth-service db:studio",
+    "postinstall": "pnpm build:shared"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "solana",
+    "blockchain",
+    "smart-contracts",
+    "anchor",
+    "collaborative-coding"
+  ],
+  "author": "VibeCode Team",
+  "license": "MIT",
+  "dependencies": {
+    "@isomorphic-git/lightning-fs": "^4.6.2"
+  }
+}

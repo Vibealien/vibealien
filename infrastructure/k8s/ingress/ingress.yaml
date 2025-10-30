@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vibecode-ingress
+  namespace: vibecode-prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/websocket-services: "collaboration-service,notification-service"
+spec:
+  tls:
+  - hosts:
+    - vibecode.dev
+    - api.vibecode.dev
+    secretName: vibecode-tls
+  rules:
+  - host: vibecode.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 3000
+  
+  - host: api.vibecode.dev
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 8000
+      
+      - path: /ws/collaborate
+        pathType: Prefix
+        backend:
+          service:
+            name: collaboration-service
+            port:
+              number: 8005
+      
+      - path: /ws/notifications
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8006

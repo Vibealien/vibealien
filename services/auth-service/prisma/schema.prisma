@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  walletAddress String   @unique @db.VarChar(44)
+  username      String?  @unique @db.VarChar(50)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([walletAddress])
+  @@index([username])
+}
+
+model Challenge {
+  id            String   @id @default(uuid())
+  walletAddress String   @db.VarChar(44)
+  challenge     String   @db.VarChar(200)
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime
+  used          Boolean  @default(false)
+
+  @@index([walletAddress])
+  @@index([challenge])
+  @@index([expiresAt])
+}
+
+model RefreshToken {
+  id            String   @id @default(uuid())
+  walletAddress String   @db.VarChar(44)
+  token         String   @unique @db.VarChar(500)
+  jti           String   @unique @db.Uuid
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  revoked       Boolean  @default(false)
+  revokedAt     DateTime?
+
+  @@index([walletAddress])
+  @@index([token])
+  @@index([expiresAt])
+}

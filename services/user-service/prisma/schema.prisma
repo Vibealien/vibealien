@@ -1,0 +1,66 @@
+// Prisma schema for User Service
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  walletAddress   String   @unique
+  username        String?  @unique
+  displayName     String?
+  bio             String?
+  avatarUrl       String?
+  githubUrl       String?
+  twitterUrl      String?
+  websiteUrl      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Stats
+  followersCount  Int      @default(0)
+  followingCount  Int      @default(0)
+  projectsCount   Int      @default(0)
+  starsGivenCount Int      @default(0)
+  
+  // Relations
+  followers       Follow[] @relation("UserFollowers")
+  following       Follow[] @relation("UserFollowing")
+  starredProjects Star[]   @relation("UserStars")
+
+  @@index([walletAddress])
+  @@index([username])
+  @@index([createdAt])
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Star {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation("UserStars", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+  @@index([createdAt])
+}
